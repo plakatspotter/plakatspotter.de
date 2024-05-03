@@ -1,9 +1,12 @@
 import { Elysia } from "elysia";
 import { Database } from "bun:sqlite";
-import { Migrator, initial } from "./migrations";
+import { Migrator, createPartiesTable, seedParties } from "./migrations";
 
 function x(sqlite: Database) {
-    return Migrator.new(sqlite).run(initial).finish();
+    return Migrator.new(sqlite)
+        .migrate(createPartiesTable)
+        .migrate(seedParties)
+        .finish();
 }
 
 export type PlakatDb = ReturnType<typeof x>;

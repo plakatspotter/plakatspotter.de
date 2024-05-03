@@ -7,7 +7,7 @@ export const Index: Component<{ db: PlakatDb }> = ({db}) => {
 
     return (
         <Base>
-        {parties.map(elem => <p>{elem.name}</p>)}
+        {parties.map(elem => <p>{JSON.stringify(elem)}</p>)}
         </Base>
     );
 }
