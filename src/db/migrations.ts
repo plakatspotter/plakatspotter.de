@@ -1,4 +1,5 @@
 import { Database, type Statement } from "bun:sqlite";
+import { dbPlugin } from ".";
 
 export interface Party {
     readonly id: number;
@@ -27,10 +28,10 @@ export class Migrator<S> {
         return this.state
     }
 
-    public sql<T extends S & { db: Database }>(this: Migrator<T>, key: string, stmt: Statement): Migrator<T> {
+    public sql<T extends S & { db: Database }>(this: Migrator<T>, key: string, stmt: string): Migrator<T> {
         if (this.isStmtNeeded(key)) {
             console.log(`Runnig migration ${key}`);
-            stmt.run();
+            this.state.db.run(stmt)
             this.recordStmtExecution(key);
         }
 
@@ -52,7 +53,7 @@ export class Migrator<S> {
 
 export const createPartiesTable = (migrator: Migrator<{ db: Database }>) => {
     const db = migrator.state.db;
-    migrator.sql("createPartiesTable", db.prepare("CREATE TABLE parties (id INTEGER PRIMARY KEY, name TEXT NOT NULL, shortName TEXT NOT NULL, website TEXT)"));
+    migrator.sql("createPartiesTable", "CREATE TABLE parties (id INTEGER PRIMARY KEY, name TEXT NOT NULL, shortName TEXT NOT NULL, website TEXT)");
 
     const createPartyStmt = db.query<Party, {$name: string, $shortName: string, $website: string | null}>("INSERT INTO parties (name, shortName, website) VALUES ($name, $shortName, $website) RETURNING *");
     function createParty(name: string, shortName: string, website: string | null): Party {

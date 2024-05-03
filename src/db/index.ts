@@ -2,14 +2,14 @@ import { Elysia } from "elysia";
 import { Database } from "bun:sqlite";
 import { Migrator, createPartiesTable, seedParties } from "./migrations";
 
-function x(sqlite: Database) {
+function initDb(sqlite: Database) {
     return Migrator.new(sqlite)
         .migrate(createPartiesTable)
         .migrate(seedParties)
         .finish();
 }
 
-export type PlakatDb = ReturnType<typeof x>;
+export type PlakatDb = ReturnType<typeof initDb>;
 
 export function dbPlugin(dbPath: string) {
     console.log(`Connecting to database ${dbPath}`)
@@ -19,5 +19,5 @@ export function dbPlugin(dbPath: string) {
     sqlite.run("PRAGMA journal_mode = WAL;");
 
     return new Elysia()
-        .decorate("db", x(sqlite))
+        .decorate("db", initDb(sqlite))
 } 
