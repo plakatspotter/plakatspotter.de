@@ -32,10 +32,14 @@ export function withBaseLayout(Content: (this: void, props: { ctx: LayoutContext
         enableCommonScripts: true,
 
         addStyle(c) {
-            styles.push(c);
+            if (!styles.includes(c)) {
+                styles.push(c);
+            }
         },
         addScript(c) {
-            scripts.push(c);
+            if (!scripts.includes(c)) {
+                scripts.push(c);
+            }
         },
         setTitle(newTitle) {
             title = newTitle
