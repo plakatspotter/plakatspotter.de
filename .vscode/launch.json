@@ -8,7 +8,7 @@
             "program": "./src/index.ts",
             "cwd": "${workspaceFolder}",
             "stopOnEntry": false,
-            "watchMode": false,
+            "watchMode": true,
             "internalConsoleOptions": "neverOpen"
         },
     ]
