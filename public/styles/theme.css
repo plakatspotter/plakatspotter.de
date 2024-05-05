@@ -1,0 +1,66 @@
+:root {
+    /*
+          https://gogh-co.github.io/Gogh/
+          Theme: Ibm 3270 (High Contrast)
+       */
+    --black1: #000000;
+    --black2: #414141;
+    --red1: #ff0000;
+    --red2: #ffa500;
+    --green1: #00ff00;
+    --green2: #98fb98;
+    --yellow1: #ffff00;
+    --yellow2: #ffff00;
+    --blue1: #00bfff;
+    --blue2: #0000cd;
+    --pink1: #ffc0cb;
+    --pink2: #a020f0;
+    --turqoise1: #40e0d0;
+    --turqoise2: #aeeeee;
+    --white1: #bebebe;
+    --white2: #ffffff;
+}
+
+/* light-theme */
+:root[data-theme="light"] {
+    --auto-color-theme: light;
+    --bg-color: var(--white2);
+    --fg-color: var(--black1);
+    --fg-color-light: var(--black2);
+
+    a {
+        color: var(--blue2);
+    }
+
+    a:hover {
+        color: var(--pink2);
+        text-decoration: none;
+    }
+}
+
+/* dark-theme */
+:root[data-theme="dark"] {
+    --auto-color-theme: dark;
+    --bg-color: var(--black1);
+    --fg-color: var(--white2);
+    --fg-color-light: var(--white1);
+
+    a {
+        color: var(--blue1);
+    }
+
+    a:hover {
+        color: var(--pink2);
+        text-decoration: none;
+    }
+}
+
+:root {
+    color: var(--fg-color);
+    background-color: var(--bg-color);
+    transition: color 0.1s, background-color 0.1s;
+}
+svg {
+    fill: var(--fg-color);
+    transition: fill 0.1s;
+}

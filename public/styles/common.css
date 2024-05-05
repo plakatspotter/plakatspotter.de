@@ -1,0 +1,6 @@
+/*
+ * Accessibility related options
+ */
+a[rel~="external"]:after {
+    content: "↗";
+}

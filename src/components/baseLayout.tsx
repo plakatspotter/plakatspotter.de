@@ -6,6 +6,8 @@
 export interface LayoutContext {
     addStyle: (c: JSX.Element) => void;
     addScript: (c: JSX.Element) => void;
+    enableCommonStyles: boolean;
+    enableCommonScripts: boolean;
     setTitle: (title?: string) => void;
     setDescription: (description?: string) => void;
 }
@@ -26,6 +28,9 @@ export function withBaseLayout(Content: (this: void, props: { ctx: LayoutContext
     let title: string | undefined;
     let description: string | undefined;
     const ctx: LayoutContext = {
+        enableCommonStyles: true,
+        enableCommonScripts: true,
+
         addStyle(c) {
             styles.push(c);
         },
@@ -41,8 +46,7 @@ export function withBaseLayout(Content: (this: void, props: { ctx: LayoutContext
     }
 
     // render the child now to trigger its context manipulation before rendering the actual layout
-    const content = Content({ctx
-    });
+    const content = Content({ ctx });
 
     // render the layout
     return (
@@ -53,7 +57,17 @@ export function withBaseLayout(Content: (this: void, props: { ctx: LayoutContext
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <title safe>{title ? `${title} – plakatspotter.de` : "plakatspotter.de"}</title>
                 {description ? <meta safe name="description" content={description} /> : undefined}
+
+                {ctx.enableCommonStyles ? <>
+                    <link rel="stylesheet" href="/public/styles/reset.css"></link>
+                    <link rel="stylesheet" href="/public/styles/theme.css"></link>
+                    <link rel="stylesheet" href="/public/styles/common.css"></link>
+                </> : undefined}
                 {styles}
+
+                {ctx.enableCommonScripts ? <>
+                    <script type="module" blocking="render" src="/public/scripts/theme.mjs"></script>
+                </> : undefined}
                 {scripts}
             </head>
             <body>
