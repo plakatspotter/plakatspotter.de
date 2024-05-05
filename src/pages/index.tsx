@@ -1,7 +1,7 @@
 import { withBaseLayout } from "../components/baseLayout.tsx";
 import { ThemeToggle } from "../components/themeToggle.tsx";
 import { UploadImage } from "../components/uploadImage.tsx";
-import type { PlakatDb } from "../db/index.ts";
+import type { PlakatDb } from "../lib/db/index.ts";
 import type { View } from "../lib/view.ts";
 
 export const Index: View<{ db: PlakatDb }> = ({ db }) => withBaseLayout(({ ctx }) => {
@@ -16,9 +16,9 @@ export const Index: View<{ db: PlakatDb }> = ({ db }) => withBaseLayout(({ ctx }
             </header>
 
             <main>
-                <div>
-                    {parties.map(elem => <p>{JSON.stringify(elem)}</p>)}
-                </div>
+                <ul>
+                    {parties.map(elem => <li><a href={`/party/${elem.shortName}/`}>{JSON.stringify(elem)}</a></li>)}
+                </ul>
 
                 <UploadImage />
             </main>
