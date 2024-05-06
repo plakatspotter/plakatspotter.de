@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import { Database } from "bun:sqlite";
 import { createPartiesTable, seedParties } from "./001_create_parties_table";
 import { createSpottingsTable, seedSpottingsForDev } from "./002_create_spotting_table";
+import type { Configuration } from "../config";
 
 type Migration<In, Out> = (migrator: Migrator<In>) => Out;
 
@@ -46,24 +47,31 @@ export class Migrator<S> {
     }
 }
 
-function initDb(sqlite: Database) {
+/**
+ * A migration which does nothing
+ */
+function noop<S>(migrator: Migrator<S>): S {
+    return migrator.state;
+}
+
+function initDb(config: Configuration, sqlite: Database) {
     return Migrator.new(sqlite)
         .migrate(createPartiesTable)
         .migrate(seedParties)
         .migrate(createSpottingsTable)
-        .migrate(seedSpottingsForDev(10))
+        .migrate(config.isDev ? seedSpottingsForDev(10) : noop)
         .finish();
 }
 
 export type PlakatDb = ReturnType<typeof initDb>;
 
-export function dbPlugin(dbPath: string) {
-    console.log(`Connecting to database ${dbPath}`)
-    const sqlite = new Database(dbPath, {
+export function dbPlugin(config: Configuration) {
+    console.log(`Connecting to database ${config.db}`)
+    const sqlite = new Database(config.db, {
         create: true,
     });
     sqlite.run("PRAGMA journal_mode = WAL;");
 
     return new Elysia()
-        .decorate("db", initDb(sqlite))
+        .decorate("db", initDb(config, sqlite))
 } 

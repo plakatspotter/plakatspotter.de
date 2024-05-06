@@ -5,14 +5,19 @@ import { Index } from "./pages";
 import path from "node:path"
 import { dbPlugin } from "./lib/db";
 import { PartyView } from "./pages/party/[shortName]";
+import { getConfig } from "./lib/config";
 
 const HTMX_PATH = path.resolve(path.join(__dirname, "..", "node_modules", "htmx.org", "dist", "htmx.js"))
-const DB_PATH = path.resolve(path.join(__dirname, "..", "db.sqlite3"))
+
+const config = getConfig();
+console.log("Using configuration", config);
 
 const app = new Elysia()
     .use(html())
-    .use(staticPlugin())
-    .use(dbPlugin(DB_PATH))
+    .use(staticPlugin({
+        noCache: config.isDev,
+    }))
+    .use(dbPlugin(config))
     .get("/public/scripts/htmx.js", () => Bun.file(HTMX_PATH))
     .get("/", ({ db }) => Index({ db }))
     .get("/party/:partyShortName", ({db, params: {partyShortName}}) => PartyView({db, partyShortName: decodeURI(partyShortName)}))
