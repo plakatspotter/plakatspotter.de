@@ -18,6 +18,15 @@ const app = new Elysia()
         noCache: config.isDev,
     }))
     .use(dbPlugin(config))
+    .headers({
+        "Content-Security-Policy": "default-src 'self';",
+        "X-XSS-Protection": "1; mode=block",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Strict-Transport-Security": config.isDev ? "" : "max-age=63072000; includeSubDomains; preload",
+        "X-Frame-Options": "DENY",
+    })
     .get("/public/scripts/htmx.js", () => Bun.file(HTMX_PATH))
     .get("/", ({ db }) => Index({ db }))
     .get("/party/:partyShortName", ({db, params: {partyShortName}}) => PartyView({db, partyShortName: decodeURI(partyShortName)}))
