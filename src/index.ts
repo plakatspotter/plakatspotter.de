@@ -15,7 +15,7 @@ const app = new Elysia()
     .use(dbPlugin(DB_PATH))
     .get("/public/scripts/htmx.js", () => Bun.file(HTMX_PATH))
     .get("/", ({ db }) => Index({ db }))
-    .get("/party/:partyShortName", ({db, params: {partyShortName}}) => PartyView({db, partyShortName}))
+    .get("/party/:partyShortName", ({db, params: {partyShortName}}) => PartyView({db, partyShortName: decodeURI(partyShortName)}))
     .listen(3000);
 
 console.log(`Server is running on http://${app.server?.hostname}:${app.server?.port}`)
