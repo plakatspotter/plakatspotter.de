@@ -13,7 +13,13 @@ export interface StartServer {
     dbPath: string,
 }
 
-export interface PartyMgmt {}
+export interface PartyLookup {
+    dbPath: string,
+}
+
+export interface PartyMgmt {
+    cmd: Subcommand<"list", PartyLookup>,
+}
 
 export interface Help {}
 
@@ -41,6 +47,13 @@ export function parseArgs(): CliOpts {
             cmd: {
                 tag: "server",
                 ...parseServer(Bun.argv.toSpliced(0, Bun.argv.indexOf("server") + 1)),
+            }
+        }
+    } else if (args.positionals.includes("party")) {
+        return {
+            cmd: {
+                tag: "party",
+                ...parsePartyMgmt(Bun.argv.toSpliced(0, Bun.argv.indexOf("party") + 1)),
             }
         }
     }
@@ -99,5 +112,39 @@ function parseServer(argv: string[]): StartServer {
         serve: serve!,
         dbPath: args.db!,
         mediaDir: args.media!,
+    }
+}
+
+function parsePartyMgmt(argv: string[]): PartyMgmt {
+    function parseList(argv: string[]): PartyLookup {
+        const { values: args } = parseArgsRaw({
+            args: argv,
+            strict: true,
+            allowPositionals: false,
+            options: {
+                db: {
+                    type: "string",
+                    default: path.join(REPO_PATH, "db.sqlite3"),
+                },
+            }
+        });
+
+        return {
+            dbPath: args.db!,
+            ...args
+        }
+    }
+
+    switch (argv.shift()) {
+        case "list":
+            return {
+                cmd: {
+                    tag: "list",
+                    ...parseList(argv),
+                }
+            }
+            break;
+        default:
+            throw "Unsupported Party Management Action";
     }
 }

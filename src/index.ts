@@ -3,11 +3,11 @@ import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static";
 import { Index } from "./pages";
 import path from "node:path"
-import { dbPlugin } from "./lib/db";
+import { dbPlugin, makeDb } from "./lib/db";
 import { PartyView } from "./pages/party/[shortName]";
 import { prepareMediaDir } from "./lib/media";
 import { UploadView } from "./pages/party/[shortName]/upload";
-import { parseArgs, type StartServer } from "./lib/cli";
+import { parseArgs, type PartyMgmt, type StartServer } from "./lib/cli";
 
 const HTMX_PATH = path.resolve(path.join(__dirname, "..", "node_modules", "htmx.org", "dist", "htmx.js"))
 
@@ -42,10 +42,34 @@ function runServer(opts: StartServer) {
 
 }
 
+function runPartyManager(opts: PartyMgmt) {
+    const db = makeDb({
+        path: opts.cmd.dbPath,
+        seedDb: false,
+    });
+
+    switch (opts.cmd.tag) {
+        case "list":
+            const parties = db.listParties()
+            console.log(parties);
+            break;
+    
+        default:
+            throw `Party Managemant Action ${opts.cmd.tag} is not implemented`;
+    }
+}
+
 const args = parseArgs();
 
 switch (args.cmd.tag) {
     case "server":
         runServer(args.cmd)
         break;
+    
+    case "party":
+        runPartyManager(args.cmd);
+        break;
+    
+    default:
+        throw `Command Handler for ${args.cmd.tag} is not implemented`;
 }

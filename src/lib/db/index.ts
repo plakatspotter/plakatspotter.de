@@ -60,7 +60,15 @@ export interface DbOptions {
     seedDb: boolean,
 }
 
-function initDb(opts: DbOptions, sqlite: Database) {
+export type PlakatDb = ReturnType<typeof makeDb>;
+
+export function makeDb(opts: DbOptions) {
+    console.log(`Connecting to database ${opts.path}`)
+    const sqlite = new Database(opts.path, {
+        create: true,
+    });
+    sqlite.run("PRAGMA journal_mode = WAL;");
+
     return Migrator.new(sqlite)
         .migrate(createPartiesTable)
         .migrate(seedParties)
@@ -70,15 +78,7 @@ function initDb(opts: DbOptions, sqlite: Database) {
         .finish();
 }
 
-export type PlakatDb = ReturnType<typeof initDb>;
-
 export function dbPlugin(opts: DbOptions) {
-    console.log(`Connecting to database ${opts.path}`)
-    const sqlite = new Database(opts.path, {
-        create: true,
-    });
-    sqlite.run("PRAGMA journal_mode = WAL;");
-
     return new Elysia()
-        .decorate("db", initDb(opts, sqlite))
+        .decorate("db", makeDb(opts))
 } 
