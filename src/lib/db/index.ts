@@ -3,6 +3,7 @@ import { Database } from "bun:sqlite";
 import { createPartiesTable, seedParties } from "./001_create_parties_table";
 import { createSpottingsTable, seedSpottingsForDev } from "./002_create_spotting_table";
 import type { Configuration } from "../config";
+import { createMediaTable } from "./003_create_media_table";
 
 type Migration<In, Out> = (migrator: Migrator<In>) => Out;
 
@@ -54,24 +55,30 @@ function noop<S>(migrator: Migrator<S>): S {
     return migrator.state;
 }
 
-function initDb(config: Configuration, sqlite: Database) {
+export interface DbOptions {
+    path: string,
+    seedDb: boolean,
+}
+
+function initDb(opts: DbOptions, sqlite: Database) {
     return Migrator.new(sqlite)
         .migrate(createPartiesTable)
         .migrate(seedParties)
         .migrate(createSpottingsTable)
-        .migrate(config.isDev ? seedSpottingsForDev(10) : noop)
+        .migrate(opts.seedDb ? seedSpottingsForDev(10) : noop)
+        .migrate(createMediaTable)
         .finish();
 }
 
 export type PlakatDb = ReturnType<typeof initDb>;
 
-export function dbPlugin(config: Configuration) {
-    console.log(`Connecting to database ${config.db}`)
-    const sqlite = new Database(config.db, {
+export function dbPlugin(opts: DbOptions) {
+    console.log(`Connecting to database ${opts.path}`)
+    const sqlite = new Database(opts.path, {
         create: true,
     });
     sqlite.run("PRAGMA journal_mode = WAL;");
 
     return new Elysia()
-        .decorate("db", initDb(config, sqlite))
+        .decorate("db", initDb(opts, sqlite))
 } 

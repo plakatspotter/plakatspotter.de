@@ -6,6 +6,7 @@
             "request": "launch",
             "name": "Run Server",
             "program": "./src/index.ts",
+            "args": ["server"],
             "cwd": "${workspaceFolder}",
             "stopOnEntry": false,
             "watchMode": true,
