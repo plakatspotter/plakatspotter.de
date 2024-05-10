@@ -7,12 +7,12 @@ import { dbPlugin, makeDb } from "./lib/db";
 import { PartyView } from "./pages/party/[shortName]";
 import { prepareMediaDir } from "./lib/media";
 import { UploadView } from "./pages/party/[shortName]/upload";
-import { parseArgs, type PartyMgmt, type StartServer } from "./lib/cli";
+import { handleCli, type ListPartiesOpts, type StartServerOpts } from "./lib/cli";
 
 const HTMX_PATH = path.resolve(path.join(__dirname, "..", "node_modules", "htmx.org", "dist", "htmx.js"))
 
-function runServer(opts: StartServer) {
-    prepareMediaDir(opts.mediaDir);
+function startServer(opts: StartServerOpts) {
+    prepareMediaDir(opts.media);
 
     const app = new Elysia()
         .use(html())
@@ -20,7 +20,7 @@ function runServer(opts: StartServer) {
             noCache: opts.development,
         }))
         .use(dbPlugin({
-            path: opts.dbPath,
+            path: opts.db,
             seedDb: opts.development,
         }))
         .headers({
@@ -36,40 +36,22 @@ function runServer(opts: StartServer) {
         .get("/", ({ db }) => Index({ db }))
         .get("/party/:partyShortName/", ({ db, params: { partyShortName } }) => PartyView({ db, partyShortName: decodeURI(partyShortName) }))
         .post("/party/:partyShortName/spotting/", ({ db, params: { partyShortName }, body }) => UploadView({ db, partyShortName: decodeURI(partyShortName) }))
-        .listen(opts.serve);
+        .listen(opts.listen);
 
     console.log(`Server is running on ${app.server?.url.href}`)
 
 }
 
-function runPartyManager(opts: PartyMgmt) {
+function listParties(opts: ListPartiesOpts) {
     const db = makeDb({
-        path: opts.cmd.dbPath,
+        path: opts.db,
         seedDb: false,
     });
-
-    switch (opts.cmd.tag) {
-        case "list":
-            const parties = db.listParties()
-            console.log(parties);
-            break;
-    
-        default:
-            throw `Party Managemant Action ${opts.cmd.tag} is not implemented`;
-    }
+    const parties = db.listParties()
+    console.table(parties, ["name", "shortName", "website"]);
 }
 
-const args = parseArgs();
-
-switch (args.cmd.tag) {
-    case "server":
-        runServer(args.cmd)
-        break;
-    
-    case "party":
-        runPartyManager(args.cmd);
-        break;
-    
-    default:
-        throw `Command Handler for ${args.cmd.tag} is not implemented`;
-}
+handleCli({
+    startServer,
+    listParties,
+});

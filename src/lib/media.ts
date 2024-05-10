@@ -1,4 +1,3 @@
-import type { Configuration } from "./config";
 import path from "node:path"
 import { mkdirSync, statSync, existsSync } from "node:fs"
 
