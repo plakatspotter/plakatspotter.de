@@ -2,7 +2,6 @@ import { Elysia } from "elysia";
 import { Database } from "bun:sqlite";
 import { createPartiesTable, seedParties } from "./001_create_parties_table";
 import { createSpottingsTable, seedSpottingsForDev } from "./002_create_spotting_table";
-import type { Configuration } from "../config";
 import { createMediaTable } from "./003_create_media_table";
 
 type Migration<In, Out> = (migrator: Migrator<In>) => Out;

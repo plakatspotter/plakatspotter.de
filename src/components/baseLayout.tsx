@@ -70,6 +70,7 @@ export function withBaseLayout(Content: (this: void, props: { ctx: LayoutContext
                 {styles}
 
                 {ctx.enableCommonScripts ? <>
+                    {/*@ts-ignore i can't figure out how to augment the shipped type to declare the blocking= attribute so @ts-ignore will have to do*/}
                     <script type="module" blocking="render" src="/public/scripts/theme.mjs"></script>
                 </> : undefined}
                 {scripts}
