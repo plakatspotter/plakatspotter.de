@@ -6,7 +6,7 @@ import path from "node:path"
 import { dbPlugin, makeDb } from "./lib/db";
 import { PartyView } from "./pages/party/[shortName]";
 import { prepareMediaDir } from "./lib/media";
-import { UploadView } from "./pages/party/[shortName]/upload";
+import { UploadView, uploadSchema } from "./pages/party/[shortName]/upload";
 import { handleCli, type ListPartiesOpts, type StartServerOpts } from "./lib/cli";
 
 const HTMX_PATH = path.resolve(path.join(__dirname, "..", "node_modules", "htmx.org", "dist", "htmx.js"))
@@ -17,11 +17,11 @@ function startServer(opts: StartServerOpts) {
     const app = new Elysia()
         .use(html())
         .use(staticPlugin({
-            noCache: opts.development,
+            noCache: opts.dev,
         }))
         .use(dbPlugin({
             path: opts.db,
-            seedDb: opts.development,
+            seedDb: opts.dev,
         }))
         .headers({
             "Content-Security-Policy": "default-src 'self';",
@@ -29,13 +29,19 @@ function startServer(opts: StartServerOpts) {
             "X-Content-Type-Options": "nosniff",
             "Referrer-Policy": "strict-origin-when-cross-origin",
             "Cross-Origin-Opener-Policy": "same-origin",
-            "Strict-Transport-Security": opts.development ? "" : "max-age=63072000; includeSubDomains; preload",
+            "Strict-Transport-Security": opts.dev ? "" : "max-age=63072000; includeSubDomains; preload",
             "X-Frame-Options": "DENY",
         })
         .get("/public/scripts/htmx.js", () => Bun.file(HTMX_PATH))
         .get("/", ({ db }) => Index({ db }))
-        .get("/party/:partyShortName/", ({ db, params: { partyShortName } }) => PartyView({ db, partyShortName: decodeURI(partyShortName) }))
-        .post("/party/:partyShortName/spotting/", ({ db, params: { partyShortName }, body }) => UploadView({ db, partyShortName: decodeURI(partyShortName) }))
+        .get("/party/:partyShortName/", ({ db, params: { partyShortName } }) => PartyView({ db, partyShortName: decodeURI(partyShortName) }), {
+            params: t.Object({
+                partyShortName: t.String(),
+            })
+        })
+        .post("/party/:partyShortName/spotting/", ({ db, params: { partyShortName }, body }) => UploadView({ db, mediaDir: opts.media, partyShortName: decodeURI(partyShortName), body }), {
+            body: uploadSchema,
+        })
         .listen(opts.listen);
 
     console.log(`Server is running on ${app.server?.url.href}`)

@@ -11,7 +11,7 @@ export type GlobalOpts = {
 
 export type StartServerOpts = GlobalOpts & {
     listen: Partial<Serve>,
-    development: boolean,
+    dev: boolean,
 }
 
 export type ListPartiesOpts = GlobalOpts;
@@ -23,7 +23,8 @@ export function handleCli(handlers: {
     const program = new Command("plakatspotter")
         .description("A web based tool for gathering and analyzing data about election posters")
         .option("--db <path>", "Path to the sqlite database", path.join(REPO_PATH, "db.sqlite3"))
-        .option("--media <path>", "Path to the applications media directory", path.join(REPO_PATH, "media"));
+        .option("--media <path>", "Path to the applications media directory", path.join(REPO_PATH, "media"))
+        .option("--dev", "Enable development mode (extra logging, no caching, etc…)", false);
 
     program.command("server")
         .description("Run the webserver")
@@ -42,7 +43,7 @@ export function handleCli(handlers: {
                     } satisfies Partial<UnixServeOptions>
 
                 default:
-                    throw `Unsupported listener protocol ${url.protocol}`
+                    throw `Unsupported listener protocol ${url.protocol} (only http and unix are supported)`
             }
         }, {
             hostname: "localhost",

@@ -72,7 +72,7 @@ export function makeDb(opts: DbOptions) {
         .migrate(createPartiesTable)
         .migrate(seedParties)
         .migrate(createSpottingsTable)
-        .migrate(opts.seedDb ? seedSpottingsForDev(10) : noop)
+        //.migrate(opts.seedDb ? seedSpottingsForDev(10) : noop)
         .migrate(createMediaTable)
         .finish();
 }
